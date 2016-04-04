@@ -124,7 +124,7 @@ void chain_finder()
   //  for(Int_t i = 0; i < Entries; i++)  //uncomment for the whole file.
     {
 
-      readout(1);//Read the event and store in the struct variables
+      readout(4);//Read the event and store in the struct variables
 
       cout<<maxin<<endl;
       
@@ -135,7 +135,7 @@ void chain_finder()
 	  
 	  //	cout<<"hello "<<endl;
 	  
-	  if( hitevent[anchor_hit].Status & HITUNAV)
+	  if( hitevent[anchor_hit].Status & HITUNAV) //If Status=1 (used), do not do anyhthing
 	    {
 	      //
 	    }
@@ -151,87 +151,81 @@ void chain_finder()
 		{
 		  seed_index = chain_hits[num_chains][seed_hit];
 		  
+		  pseed[0] = hitevent[seed_index].X;
+		  pseed[1] = hitevent[seed_index].Y;
+		  pseed[2] = hitevent[seed_index].Z;
 		  
-		  {
-		    
-		    pseed[0] = hitevent[seed_index].X;
-		    pseed[1] = hitevent[seed_index].Y;
-		    pseed[2] = hitevent[seed_index].Z;
-		    
-		    
-		    // cout<<"index: "<<num_hits_this_chain[num_chains]<<endl;
-		    // cout<<"**********pseed[0]: "<<pseed[0]<<" pseed[1]: "<<pseed[1]<<" pseed[2]: "<<pseed[2]<<endl<<endl;
-		    
-		    for(next_hit = 0; next_hit<fHit; next_hit++)
-		      {
-			if( !(hitevent[next_hit].Status & HITUNAV) )
-			  {
-			    
-			    pnext[0] = hitevent[next_hit].X;
-			    pnext[1] = hitevent[next_hit].Y;
-			    pnext[2] = hitevent[next_hit].Z;
-			    //	    	    if(pnext[0]>0 || pnext[1]>0 || pnext[2]>0)
+		  
+		  // cout<<"index: "<<num_hits_this_chain[num_chains]<<endl;
+		  // cout<<"**********pseed[0]: "<<pseed[0]<<" pseed[1]: "<<pseed[1]<<" pseed[2]: "<<pseed[2]<<endl<<endl;
+		  
+		  for(next_hit = 0; next_hit<fHit; next_hit++)
+		    {
+		      if( !(hitevent[next_hit].Status & HITUNAV) )
+			{
+			  
+			  pnext[0] = hitevent[next_hit].X;
+			  pnext[1] = hitevent[next_hit].Y;
+			  pnext[2] = hitevent[next_hit].Z;
+					    
+			  SUBST(pseed, pnext, diff);
+			  
+			  separation = DIFMOD(diff);
+			  
+			  if(separation <= MAX_LINK_SEP && separation > 0)
 			    {
+			      //	    add it to the current chain
+			      if (num_hits_this_chain[num_chains] >= MAX_HITS_ON_CHAIN)
+				{        
+				  printf("Too many hits for the chain list. Aborting.\n"); 
+				  return -1;
+				}
 			      
-			      SUBST(pseed, pnext, diff);
+			      chain_hits[num_chains][num_hits_this_chain[num_chains]] = next_hit;
 			      
-			      separation = DIFMOD(diff);
+			      /* mark it as used */
+			      hitevent[next_hit].Status |= HISUSED;
+			      num_hits_this_chain[num_chains]++;
 			      
-			      if(separation <= MAX_LINK_SEP && separation > 0)
-				{
-				  //	    add it to the current chain
-				  if (num_hits_this_chain[num_chains] >= MAX_HITS_ON_CHAIN)
-				    {        
-				      printf("Too many hits for the chain list. Aborting.\n"); 
-				      return -1;
-				    }
-				  
-				  chain_hits[num_chains][num_hits_this_chain[num_chains]] = next_hit;
-				  
-				  /* mark it as used */
-				  hitevent[next_hit].Status |= HISUSED;
-				  num_hits_this_chain[num_chains]++;
-				  
-				}// if(separation
-			    }
-			    else
-			      {}
-			    
-			  }// if( !(hitevent
-			
-		      }// for(next_hit
-		    
-		    
-		  }
+			    }// if(separation
+
+			  else
+			    {}
+			  
+			}// if( !(hitevent
+		      
+		    }// for(next_hit
+		  
+		  
 		  else
 		    {}
 		  
 		  
 		}//  for (seed_hit
 	      
-	      HitIn = 0;// It is initialized before enter the loop to fill the root file
-	      
-	      if( num_hits_this_chain[num_chains] > 1) 
+	  HitIn = 0;// It is initialized before enter the loop to fill the root file
+	  
+	  if( num_hits_this_chain[num_chains] > 1) 
+	    {
+	      if(1)
 		{
-		  if(1)
+		  printf("....KEEPING THIS CHAIN #%d. %d hits \n", num_chains,num_hits_this_chain[num_chains]);
+		  
+		  
+		  for (Int_t jj=0; jj<num_hits_this_chain[num_chains]; jj++)
 		    {
-		      printf("....KEEPING THIS CHAIN #%d. %d hits \n", num_chains,num_hits_this_chain[num_chains]);
-		      
-		      
-		      for (Int_t jj=0; jj<num_hits_this_chain[num_chains]; jj++)
-			{
-			  printf(" %d", chain_hits[num_chains][jj]);
+		      printf(" %d", chain_hits[num_chains][jj]);
 			  
-			  //Fill the variables value of the found chain
+		      //Fill the variables value of the found chain
 			  ChainEv.X_rec[HitIn] = hitevent[chain_hits[num_chains][jj]].X;
 			  ChainEv.Y_rec[HitIn] = hitevent[chain_hits[num_chains][jj]].Y;
 			  ChainEv.Z_rec[HitIn] = hitevent[chain_hits[num_chains][jj]].Z;
-			  cout<<"Z: "<<hitevent[chain_hits[num_chains][jj]].Z<<endl;;
+			  cout<<" Z: "<<hitevent[chain_hits[num_chains][jj]].Z<<endl;;
 			  HitIn++; 
 			  
 			}
-		      
-		      for(Int_t kk=HitIn; kk<500;kk++)
+
+		      for(Int_t kk=HitIn; kk<500;kk++)	//Clean up loop
 			{
 			  ChainEv.X_rec[kk]=ChainEv.Y_rec[kk]=ChainEv.Z_rec[kk]=0;
 			}
@@ -256,8 +250,9 @@ void chain_finder()
 	      
 	      
 	      
-	    }
-	}
+	    }//else (from if( hitevent[anchor_hit].Status & HITUNAV)
+	  
+	}//for(anchor_hit...
 
 
 
