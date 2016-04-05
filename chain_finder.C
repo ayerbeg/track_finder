@@ -121,10 +121,11 @@ void chain_finder()
   EvID = 0;
   
   
-  //  for(Int_t i = 0; i < Entries; i++)  //uncomment for the whole file.
+  //   for(Int_t i = 0; i < Entries; i++)  //uncomment for the whole file.
+  for(Int_t i = 4; i < 7; i++) 
     {
 
-      readout(4);//Read the event and store in the struct variables
+      readout(i);//Read the event and store in the struct variables
 
       cout<<maxin<<endl;
       
@@ -135,7 +136,7 @@ void chain_finder()
 	  
 	  //	cout<<"hello "<<endl;
 	  
-	  if( hitevent[anchor_hit].Status & HITUNAV) //If Status=1 (used), do not do anyhthing
+	  if( (hitevent[anchor_hit].Status & HITUNAV) && hitevent[anchor_hit].Ev_pos == 2); //If Status=1 (used), do not do anyhthing. With the condition Ev_pos, we stop the search of hots on the second events. We just connect the first with events related on the second
 	    {
 	      //
 	    }
@@ -159,7 +160,8 @@ void chain_finder()
 		  // cout<<"index: "<<num_hits_this_chain[num_chains]<<endl;
 		  // cout<<"**********pseed[0]: "<<pseed[0]<<" pseed[1]: "<<pseed[1]<<" pseed[2]: "<<pseed[2]<<endl<<endl;
 		  
-		  for(next_hit = 0; next_hit<fHit; next_hit++)
+		  //		  for(next_hit = 0; next_hit<fHit; next_hit++)
+		  for(next_hit = 0; next_hit<(aHit[0]+aHit[1]); next_hit++)//the max number of hits is the sum of two events hits
 		    {
 		      if( !(hitevent[next_hit].Status & HITUNAV) )
 			{
@@ -220,7 +222,7 @@ void chain_finder()
 			  ChainEv.X_rec[HitIn] = hitevent[chain_hits[num_chains][jj]].X;
 			  ChainEv.Y_rec[HitIn] = hitevent[chain_hits[num_chains][jj]].Y;
 			  ChainEv.Z_rec[HitIn] = hitevent[chain_hits[num_chains][jj]].Z;
-			  cout<<" Z: "<<hitevent[chain_hits[num_chains][jj]].Z<<endl;;
+			  cout<<" X: "<<hitevent[chain_hits[num_chains][jj]].X<<endl;;
 			  HitIn++; 
 			  
 			}
@@ -302,25 +304,80 @@ double DIFMOD(Double_t dif[])
 void readout(Int_t i)
 {
 
+  maxin = 0;
+
+      // for(Int_t p = 0; p<ndim; p++)
+      // 	{
+      // 	  hitevent[p].X = 0;
+      // 	  hitevent[p].Y = 0;
+      // 	  hitevent[p].Z = 0;
+      // 	}//cleaning loop
+  
       RTPCTree->GetEntry(i);
       RTPCTree->Show(i,fHit);
 
       Int_t in = 0;
+      aHit[0]=fHit;
+
+
 
       
-      for(Int_t p = 0; p<fHit; p++)
+
+      
+      for(Int_t p = 0; p<aHit[0]; p++)
 	{
-	  if(fXRec[p]>0 || fYRec[p]>0 ||fZRec[p]>0 )
+	  //	  cout<<"X: "<<fXRec[p]<<" Y; "<< fYRec[p] << " Z: " <<fZRec[p] <<endl;
+	  if (i>4)
+	    {
+	      if (hitevent[p+aHit[0]].Status = 0)//This condition, check if the event read joint previously has marked hits
+		{
+		  hitevent[p].X = fXRec[p];
+		  hitevent[p].Y = fYRec[p];
+		  hitevent[p].Z = fZRec[p];
+		  hitevent[p].Status = 0;
+		  hitevent[p].Ev_pos = 1;
+		  maxin++;
+		}
+	      else
+		{
+		  hitevent[p].Status = 1;
+		  hitevent[p].Ev_pos = 1;
+		  maxin++;
+		  //	      cout<<"HELLO"<<p<<endl;
+		}
+	    }
+	  else
 	    {
 	      hitevent[p].X = fXRec[p];
 	      hitevent[p].Y = fYRec[p];
 	      hitevent[p].Z = fZRec[p];
 	      hitevent[p].Status = 0;
+	      hitevent[p].Ev_pos = 1;
 	      maxin++;
 	    }
 	}
+
+      RTPCTree->GetEntry(i+1);
+      RTPCTree->Show(i+1,fHit);
+      aHit[1]=fHit;
+
+      
+      for(Int_t p = aHit[0]; p<(aHit[0]+aHit[1]); p++)
+      	{
+	  //	  cout<<"p2: "<<p<<endl;
+
+	  //	  cout<<"X: "<<fXRec[p-aHit[0]]<<" Y; "<< fYRec[p-aHit[0]] << " Z: " <<fZRec[p-aHit[0]] <<endl;
+	  hitevent[p].X = fXRec[p-aHit[0]];
+	  hitevent[p].Y = fYRec[p-aHit[0]];
+	  hitevent[p].Z = fZRec[p-aHit[0]];
+	  hitevent[p].Status = 0;
+	  hitevent[p].Ev_pos = 2;
+	  maxin++;
+	  
+      	}
+      
       cout<<"******************************IN***********************:"<<maxin<<endl;
-      //     RTPCTree->Show(i);
+      //       RTPCTree->Show(i);
    
 }
 

@@ -48,16 +48,16 @@ const Int_t NCont = 999;
   */
 }
 
-TGraph2D *dt[25];//  = new TGraph2D();  
+TGraph2D *dt[500];//  = new TGraph2D();  
 
-Color_t color_wh[28]={kRed,kViolet,kGreen-2,kOrange+7,kBlue,kCyan+2,kSpring-5,kMagenta,kRed+3,kViolet-7,kGreen-6,kOrange+3,kBlue-2,kPink-9,kCyan+2,kYellow-6,kMagenta-9,kRed,kViolet,kGreen+4,kOrange,kBlue,kPink,kCyan+2,kSpring-5,kRed-2,kViolet-9};
+Color_t color_wh[28]={kRed,kViolet,kGreen-2,kOrange+7,kBlue,kCyan+2,kSpring-5,kMagenta,kRed+3,kViolet-7,kGreen-6,kOrange+3,kBlue-2,kPink-9,kCyan+2,kYellow-6,kMagenta-9,kRed,kViolet,kGreen+4,kOrange,kBlue,kPink,kCyan+2,kSpring-5,kRed-2,kViolet-9,};
 
 
 
 void graph2dfile(Int_t k, Int_t  steps, Double_t xrec[300], Double_t yrec[300], Double_t zrec[300])
 {
   if (steps == 0) return;
-
+  Int_t col_code = k%28;
   if(k == -1 )
     {
       TPolyLine3D *track3D = new TPolyLine3D(steps,xrec,yrec,zrec);
@@ -74,7 +74,7 @@ void graph2dfile(Int_t k, Int_t  steps, Double_t xrec[300], Double_t yrec[300], 
       TPolyLine3D *track3D = new TPolyLine3D(steps,xrec,yrec,zrec);
       
       track3D->SetLineWidth(2);
-      track3D->SetLineColor(color_wh[k]);
+      track3D->SetLineColor(color_wh[col_code]);
       track3D->Draw("same");
       
       
@@ -82,7 +82,7 @@ void graph2dfile(Int_t k, Int_t  steps, Double_t xrec[300], Double_t yrec[300], 
       dt[k]->SetName(Form("Event /%d",k));
       dt[k]->SetMarkerStyle(20);
       dt[k]->SetMarkerSize(.9);
-      dt[k]->SetMarkerColor(color_wh[k]);
+      dt[k]->SetMarkerColor(color_wh[col_code]);
       dt[k]->SetTitle("RTPC - Hits/Event");
       
       dt[k]->GetXaxis()->SetTitle("X (cm)"); dt[k]->GetXaxis()->SetTitleOffset(1.4); dt[k]->GetXaxis()->CenterTitle() ;

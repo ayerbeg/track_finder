@@ -1,7 +1,7 @@
 #ifndef chain_finder_h
 #define chain_finder_h 1
 
-#define ndim 500
+#define ndim 1500//so big? 
 #define MAX_NUM_CHAINS 100 //in the original is 100, should studied
 #define MAX_HITS_ON_CHAIN 300 //in the original is 100, should studied
 #define MAX_LINK_SEP 7 //this number was estimated by Howard. This is the maximum separation to be included in the chain
@@ -14,6 +14,7 @@ typedef struct {
   Double_t Z;
   Int_t Hit;
   Int_t Status;
+  Int_t Ev_pos; //if event is the first or the second on the pile
 } HitStruct;
 
 
@@ -37,6 +38,8 @@ TTree *RTPCTree;
 Double_t fXRec[ndim], fYRec[ndim], fZRec[ndim];
 Int_t    fHit;
 
+Int_t    aHit [2];//temporal array
+
 Int_t anchor_hit, seed_hit, next_hit, seed_index;
 Int_t num_chains;
 
@@ -49,7 +52,7 @@ Double_t pseed[3], pnext[3];
 
 Double_t diff[3];
 
-Int_t maxin;
+Int_t maxin; //max number of hits in an event. Calculated during the readout of the event
 
 
 Int_t HitIn;
