@@ -121,10 +121,11 @@ void chain_finder()
   EvID = 0;
   
   
-  //  for(Int_t i = 0; i < Entries; i++)  //uncomment for the whole file.
+  //   for(Int_t i = 0; i < Entries; i++)  //uncomment for the whole file.
+  for(Int_t i = 4; i < 7; i++) 
     {
 
-      readout(1);//Read the event and store in the struct variables
+      readout(i);//Read the event and store in the struct variables
 
       cout<<maxin<<endl;
       
@@ -135,7 +136,7 @@ void chain_finder()
 	  
 	  //	cout<<"hello "<<endl;
 	  
-	  if( hitevent[anchor_hit].Status & HITUNAV)
+	  if( (hitevent[anchor_hit].Status & HITUNAV) && hitevent[anchor_hit].Ev_pos == 2); //If Status=1 (used), do not do anyhthing. With the condition Ev_pos, we stop the search of hots on the second events. We just connect the first with events related on the second
 	    {
 	      //
 	    }
@@ -151,87 +152,82 @@ void chain_finder()
 		{
 		  seed_index = chain_hits[num_chains][seed_hit];
 		  
+		  pseed[0] = hitevent[seed_index].X;
+		  pseed[1] = hitevent[seed_index].Y;
+		  pseed[2] = hitevent[seed_index].Z;
 		  
-		  {
-		    
-		    pseed[0] = hitevent[seed_index].X;
-		    pseed[1] = hitevent[seed_index].Y;
-		    pseed[2] = hitevent[seed_index].Z;
-		    
-		    
-		    // cout<<"index: "<<num_hits_this_chain[num_chains]<<endl;
-		    // cout<<"**********pseed[0]: "<<pseed[0]<<" pseed[1]: "<<pseed[1]<<" pseed[2]: "<<pseed[2]<<endl<<endl;
-		    
-		    for(next_hit = 0; next_hit<fHit; next_hit++)
-		      {
-			if( !(hitevent[next_hit].Status & HITUNAV) )
-			  {
-			    
-			    pnext[0] = hitevent[next_hit].X;
-			    pnext[1] = hitevent[next_hit].Y;
-			    pnext[2] = hitevent[next_hit].Z;
-			    //	    	    if(pnext[0]>0 || pnext[1]>0 || pnext[2]>0)
+		  
+		  // cout<<"index: "<<num_hits_this_chain[num_chains]<<endl;
+		  // cout<<"**********pseed[0]: "<<pseed[0]<<" pseed[1]: "<<pseed[1]<<" pseed[2]: "<<pseed[2]<<endl<<endl;
+		  
+		  //		  for(next_hit = 0; next_hit<fHit; next_hit++)
+		  for(next_hit = 0; next_hit<(aHit[0]+aHit[1]); next_hit++)//the max number of hits is the sum of two events hits
+		    {
+		      if( !(hitevent[next_hit].Status & HITUNAV) )
+			{
+			  
+			  pnext[0] = hitevent[next_hit].X;
+			  pnext[1] = hitevent[next_hit].Y;
+			  pnext[2] = hitevent[next_hit].Z;
+					    
+			  SUBST(pseed, pnext, diff);
+			  
+			  separation = DIFMOD(diff);
+			  
+			  if(separation <= MAX_LINK_SEP && separation > 0)
 			    {
+			      //	    add it to the current chain
+			      if (num_hits_this_chain[num_chains] >= MAX_HITS_ON_CHAIN)
+				{        
+				  printf("Too many hits for the chain list. Aborting.\n"); 
+				  return -1;
+				}
 			      
-			      SUBST(pseed, pnext, diff);
+			      chain_hits[num_chains][num_hits_this_chain[num_chains]] = next_hit;
 			      
-			      separation = DIFMOD(diff);
+			      /* mark it as used */
+			      hitevent[next_hit].Status |= HISUSED;
+			      num_hits_this_chain[num_chains]++;
 			      
-			      if(separation <= MAX_LINK_SEP && separation > 0)
-				{
-				  //	    add it to the current chain
-				  if (num_hits_this_chain[num_chains] >= MAX_HITS_ON_CHAIN)
-				    {        
-				      printf("Too many hits for the chain list. Aborting.\n"); 
-				      return -1;
-				    }
-				  
-				  chain_hits[num_chains][num_hits_this_chain[num_chains]] = next_hit;
-				  
-				  /* mark it as used */
-				  hitevent[next_hit].Status |= HISUSED;
-				  num_hits_this_chain[num_chains]++;
-				  
-				}// if(separation
-			    }
-			    else
-			      {}
-			    
-			  }// if( !(hitevent
-			
-		      }// for(next_hit
-		    
-		    
-		  }
+			    }// if(separation
+
+			  else
+			    {}
+			  
+			}// if( !(hitevent
+		      
+		    }// for(next_hit
+		  
+		  
 		  else
 		    {}
 		  
 		  
 		}//  for (seed_hit
 	      
-	      HitIn = 0;// It is initialized before enter the loop to fill the root file
-	      
-	      if( num_hits_this_chain[num_chains] > 1) 
+	  HitIn = 0;// It is initialized before enter the loop to fill the root file
+	  
+	  if( num_hits_this_chain[num_chains] > 1) 
+	    {
+	      if(1)
 		{
-		  if(1)
+		  printf("....KEEPING THIS CHAIN #%d. %d hits \n", num_chains,num_hits_this_chain[num_chains]);
+		  
+		  
+		  for (Int_t jj=0; jj<num_hits_this_chain[num_chains]; jj++)
 		    {
-		      printf("....KEEPING THIS CHAIN #%d. %d hits \n", num_chains,num_hits_this_chain[num_chains]);
-		      
-		      
-		      for (Int_t jj=0; jj<num_hits_this_chain[num_chains]; jj++)
-			{
-			  printf(" %d", chain_hits[num_chains][jj]);
+		      printf(" %d", chain_hits[num_chains][jj]);
 			  
-			  //Fill the variables value of the found chain
+		      //Fill the variables value of the found chain
 			  ChainEv.X_rec[HitIn] = hitevent[chain_hits[num_chains][jj]].X;
 			  ChainEv.Y_rec[HitIn] = hitevent[chain_hits[num_chains][jj]].Y;
 			  ChainEv.Z_rec[HitIn] = hitevent[chain_hits[num_chains][jj]].Z;
-			  cout<<"Z: "<<hitevent[chain_hits[num_chains][jj]].Z<<endl;;
+			  cout<<" X: "<<hitevent[chain_hits[num_chains][jj]].X<<endl;;
 			  HitIn++; 
 			  
 			}
-		      
-		      for(Int_t kk=HitIn; kk<500;kk++)
+
+		      for(Int_t kk=HitIn; kk<500;kk++)	//Clean up loop
 			{
 			  ChainEv.X_rec[kk]=ChainEv.Y_rec[kk]=ChainEv.Z_rec[kk]=0;
 			}
@@ -256,8 +252,9 @@ void chain_finder()
 	      
 	      
 	      
-	    }
-	}
+	    }//else (from if( hitevent[anchor_hit].Status & HITUNAV)
+	  
+	}//for(anchor_hit...
 
 
 
@@ -307,25 +304,80 @@ double DIFMOD(Double_t dif[])
 void readout(Int_t i)
 {
 
+  maxin = 0;
+
+      // for(Int_t p = 0; p<ndim; p++)
+      // 	{
+      // 	  hitevent[p].X = 0;
+      // 	  hitevent[p].Y = 0;
+      // 	  hitevent[p].Z = 0;
+      // 	}//cleaning loop
+  
       RTPCTree->GetEntry(i);
       RTPCTree->Show(i,fHit);
 
       Int_t in = 0;
+      aHit[0]=fHit;
+
+
 
       
-      for(Int_t p = 0; p<fHit; p++)
+
+      
+      for(Int_t p = 0; p<aHit[0]; p++)
 	{
-	  if(fXRec[p]>0 || fYRec[p]>0 ||fZRec[p]>0 )
+	  //	  cout<<"X: "<<fXRec[p]<<" Y; "<< fYRec[p] << " Z: " <<fZRec[p] <<endl;
+	  if (i>4)
+	    {
+	      if (hitevent[p+aHit[0]].Status = 0)//This condition, check if the event read joint previously has marked hits
+		{
+		  hitevent[p].X = fXRec[p];
+		  hitevent[p].Y = fYRec[p];
+		  hitevent[p].Z = fZRec[p];
+		  hitevent[p].Status = 0;
+		  hitevent[p].Ev_pos = 1;
+		  maxin++;
+		}
+	      else
+		{
+		  hitevent[p].Status = 1;
+		  hitevent[p].Ev_pos = 1;
+		  maxin++;
+		  //	      cout<<"HELLO"<<p<<endl;
+		}
+	    }
+	  else
 	    {
 	      hitevent[p].X = fXRec[p];
 	      hitevent[p].Y = fYRec[p];
 	      hitevent[p].Z = fZRec[p];
 	      hitevent[p].Status = 0;
+	      hitevent[p].Ev_pos = 1;
 	      maxin++;
 	    }
 	}
+
+      RTPCTree->GetEntry(i+1);
+      RTPCTree->Show(i+1,fHit);
+      aHit[1]=fHit;
+
+      
+      for(Int_t p = aHit[0]; p<(aHit[0]+aHit[1]); p++)
+      	{
+	  //	  cout<<"p2: "<<p<<endl;
+
+	  //	  cout<<"X: "<<fXRec[p-aHit[0]]<<" Y; "<< fYRec[p-aHit[0]] << " Z: " <<fZRec[p-aHit[0]] <<endl;
+	  hitevent[p].X = fXRec[p-aHit[0]];
+	  hitevent[p].Y = fYRec[p-aHit[0]];
+	  hitevent[p].Z = fZRec[p-aHit[0]];
+	  hitevent[p].Status = 0;
+	  hitevent[p].Ev_pos = 2;
+	  maxin++;
+	  
+      	}
+      
       cout<<"******************************IN***********************:"<<maxin<<endl;
-      //     RTPCTree->Show(i);
+      //       RTPCTree->Show(i);
    
 }
 
