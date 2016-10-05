@@ -1,5 +1,6 @@
 #include <iostream>
 #include "string.h"
+#include "string"
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1.h"
@@ -11,6 +12,9 @@
 #include "TStyle.h"
 #include "TStopwatch.h"
 #include <TBenchmark.h>
+
+#include <fstream>
+#include <sstream>
 
 #include "chain_finder_main.h"
 
@@ -48,7 +52,14 @@ void chain_finder()
    //   TFile *infile = new TFile("./files/1000SuperEvents.root");
    //TFile *infile = new TFile("./files/MirrorEvents.root");
    //   TFile *infile = new TFile("files/10T-10_200ns_SE-26.root");
-   TFile *infile = new TFile("files/nt_P100T90_SE.root");
+   //   TFile *infile = new TFile("files/nt_P100T90_SE.root");
+
+   TString inputf = inputfile;
+   cout<<"INPUT FILE: " <<inputf<<endl;
+   
+   TFile *infile = new TFile(inputf);
+   
+
    
       //TFile *infile=new TFile("./files/nt_Step1mm_SE.root");
   
@@ -103,7 +114,13 @@ void chain_finder()
    //***********************************
    // DEFINE VARIABLES TO SAVE ROOT FILE
    
-   TFile *rootoutfile = new TFile("ChainEvents_2.root", "recreate");
+   //   TFile *rootoutfile = new TFile("ChainEvents_2.root", "recreate");
+
+   TString outf = outputfile;
+
+   cout<<"OUTPUT FILE: " <<outf<<endl;
+   
+    TFile *rootoutfile = new TFile(outf, "recreate");
    
    TTree *chaintree = new TTree("chaintree","SE");
    
@@ -137,6 +154,13 @@ void chain_finder()
   //anchor: the hit to start the search
   //status: the flag to indicate when a hit is being removed from the hit pool
   //seed_hit: the hit used to search in the sphere with r<11mm near hits. Initially is the same as anchor
+
+
+  Double_t Max_Link_Sep = space;
+  Double_t Max_Ang = max_ang;
+  Double_t Min_Ang = min_ang;
+  Double_t Ang_Sep = ang_sep;
+
   
   
   anchor_hit = 0;
@@ -211,7 +235,9 @@ void chain_finder()
 
 				  hseparation->Fill(separation);//Histogram of separation between hits
 				  
-				  if(separation <= MAX_LINK_SEP && separation > 0.0)
+				  // if(separation <= MAX_LINK_SEP && separation > 0.0)
+
+				  if(separation <= Max_Link_Sep && separation > 0.0)
 
 				    //by definition, separation is always>0 but with this condition,
 				    //we remove 0's (i.e. repeated hits) IT MUST BE SOLVED WITH THE PREVIOUS CONDITION
@@ -266,17 +292,18 @@ void chain_finder()
 				      //A better analysis shopuld be applied to determine the values
 				      //But definetly shouyld be a distintion between close and far hits
 				      
-				      if (separation < 4 && acceptance <39)
-					//	    if(acceptance <  40)
-					{
-					  accept_hit(next_hit);
-					}
-				      
-				      if (separation > 4 && acceptance <33.3)
-					{					
-					  accept_hit(next_hit);
-					}
-				      
+				      //    if (separation < 4 && acceptance <39)
+					if (separation < Ang_Sep && acceptance < Max_Ang)
+					  {
+					    accept_hit(next_hit);
+					  }
+					
+					if (separation > Ang_Sep && acceptance < Min_Ang)
+					  //	if (separation > 4 && acceptance <33.3)
+					  {					
+					    accept_hit(next_hit);
+					  }
+					
 				    }// if(separation<=
 				
 				  else
@@ -498,11 +525,78 @@ void accept_hit(Int_t next_hit)
 }
 
 
+void variable(TString FileName)
+{
+
+    
+  ifstream infile;
+  string line;
+  infile.open(FileName);
+  if (infile)
+    {
+      while (!infile.eof())
+	{
+	  if (getline(infile,line))
+	    {
+	      	string buf;
+		string wert;
+		double doublewert;
+		stringstream ss(line);
+		//		cout << ">" << line << endl;
+		ss >> buf;
+		
+		if (buf == "inputfile")	 
+		  {			
+		    ss >> inputfile;
+		  }
+
+		if (buf == "outputfile")	 
+		  {			
+		    ss >> outputfile;
+		    if (outputfile == "") outputfile = "ChainCandidates.root"; //DEFAULT VALUES
+		  }
+
+		if (buf == "space")
+		  {
+		    ss >> doublewert;
+		    space = doublewert;	
+		  }
+		
+		if (buf == "max_ang")
+		  {
+		    ss >> doublewert;
+		    max_ang = doublewert;	
+		  }
+
+		if (buf == "min_ang")
+		  {
+		    ss >> doublewert;
+		    min_ang = doublewert;	
+		  }
+
+		if (buf == "ang_sep")
+		  {
+		    ss >> doublewert;
+		    ang_sep = doublewert;	
+		  }
+	    }
+	}
+    }
+}
 
 
 
 int main(int argc, char** argv)
 {
+  
+  
+  TString dataname;
+  dataname = "chain.ini";
+  cout << "Compiled on: " __DATE__ " " __TIME__ "." << endl;
+
+  cout<<"\n\nINI file: "<<dataname<<endl;
+  variable(dataname);
+
   
   TStopwatch timer;
   timer.Start();

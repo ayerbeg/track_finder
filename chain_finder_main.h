@@ -8,6 +8,7 @@
 
 #include "TVector3.h"
 
+
 typedef struct {
   //  Int_t EventID;
   Int_t event;
@@ -65,6 +66,15 @@ Int_t    max_entries;//temporary variable to control number of entries to read
 
 Int_t    adj_chain_hits[MAX_NUM_CHAINS][MAX_HITS_ON_CHAIN];
 
+
+TString inputfile;
+TString outputfile;
+double space;
+double max_ang;
+double min_ang;
+double ang_sep;
+
+void variable(TString);
 
 void readout(Int_t, Int_t);
 
