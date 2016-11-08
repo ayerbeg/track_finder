@@ -35,9 +35,16 @@ using namespace std;
 
 /*THIS IS THE EXECUTABLE VERSION OF CHAIN FINDER*/
 
-void chain_finder()
+void chain_finder(Int_t k)
 {
 
+
+  //TEMPORARY
+  if(k == 1)
+    {
+      cout<<" SECOND PASS!!"<<endl;
+      return;
+    }
 
   //GLOBAL VARIABLES HERE
   // Bool_t VERBOSE = 0;
@@ -50,19 +57,15 @@ void chain_finder()
   // DEFINE VARIABLES FROM ROOT FILE
    
    //   TFile *infile = new TFile("./files/1000SuperEvents.root");
-   //TFile *infile = new TFile("./files/MirrorEvents.root");
+   //   TFile *infile = new TFile("./files/MirrorEvents.root");
    //   TFile *infile = new TFile("files/10T-10_200ns_SE-26.root");
    //   TFile *infile = new TFile("files/nt_P100T90_SE.root");
 
    TString inputf = inputfile;
    cout<<"INPUT FILE: " <<inputf<<endl;
-   
-   TFile *infile = new TFile(inputf);
-   
 
    
-      //TFile *infile=new TFile("./files/nt_Step1mm_SE.root");
-  
+   TFile *infile = new TFile(inputf);
    RTPCTree =(TTree*)infile->Get("eventtree");
    
    Int_t Entries = RTPCTree->GetEntries();
@@ -76,22 +79,20 @@ void chain_finder()
    
    //- ********************************
    
-
-   /*
    // VARIABLES SET FOR 2nd PASS
-   TFile *infile=new TFile("ChainEvents_1.root");
+   TFile *infile_2=new TFile("ChainEvents_1.root");
   
-   RTPCTree =(TTree*)infile->Get("chaintree");
+   RTPCTree_2 =(TTree*)infile_2->Get("chaintree");
    
-   Int_t Entries = RTPCTree->GetEntries();
-   cout<<"Entries: "<<Entries<<endl;
+   Int_t Entries_2 = RTPCTree_2->GetEntries();
+   cout<<"Entries_2: "<<Entries_2<<endl;
    
-   RTPCTree ->SetBranchAddress("event", &event);
-   RTPCTree ->SetBranchAddress("X", &X);
-   RTPCTree ->SetBranchAddress("Y", &Y);
-   RTPCTree ->SetBranchAddress("Z", &Z);
-   RTPCTree ->SetBranchAddress("Hit", &Hit);
-   */
+   RTPCTree_2 -> SetBranchAddress("event", &event);
+   RTPCTree_2 -> SetBranchAddress("X", &X);
+   RTPCTree_2 -> SetBranchAddress("Y", &Y);
+   RTPCTree_2 -> SetBranchAddress("Z", &Z);
+   RTPCTree_2 -> SetBranchAddress("Hit", &Hit);
+   
 
    /*   
    // TEMPORARY SET OF VARIABLES
@@ -122,7 +123,7 @@ void chain_finder()
    
     TFile *rootoutfile = new TFile(outf, "recreate");
    
-   TTree *chaintree = new TTree("chaintree","SE");
+   chaintree = new TTree("chaintree","SE");
    
    chaintree->Branch("event", &ChainEv.ID, "ID/I");  // Create a branch called a, linked to local variable x, of type D (double)
    chaintree->Branch("X", &ChainEv.X_rec, "X_rec[500]/D");
@@ -167,10 +168,10 @@ void chain_finder()
   num_chains = 0;//Chain index (How many chains there are)
   num_hits_this_chain[num_chains] = 0;//Number of hits in the chain (was num_hits_this_chain[0])
 
-  Int_t temp_eve = -1;
-  Int_t real_eve_counter = 0;
+  temp_eve = -1;
+  real_eve_counter = 0;
 
-  Int_t double_counter = 0;
+  double_counter = 0;
   
   // Int_t max_entries = 1;
      
@@ -180,9 +181,9 @@ void chain_finder()
     //    for(Int_t ii = 8; ii < max_entries; ii++) 
     {
       //  Int_t ii = 180;
-      readout(ii, Entries);//Read the event and store in the struct variables
-      
-            
+
+      readout(hitevent, ii, Entries, k);//Read the event and store in the struct variables
+                  
       for (anchor_hit = 0; anchor_hit < maxin; anchor_hit++) //index of anchor hit
 	{
 	  
@@ -204,6 +205,9 @@ void chain_finder()
 	      chain_hits[num_chains][0] = anchor_hit;// **(A)**
 	      
 	      hitevent[anchor_hit].Status |= HISUSED;// |= --> or eq;  a = a | b. It just assign the USED status to the hit
+
+
+	      //SEARCH ALGORITHM----->
 	      
 	      for (seed_hit = 0; seed_hit < num_hits_this_chain[num_chains]; seed_hit++)
 		{
@@ -263,7 +267,9 @@ void chain_finder()
 					}//if(index_hits>1...	  
 				      
 				      if(acceptance>90.) acceptance = 180. - acceptance;
-				      
+
+
+				      // FILLING HISTOGRAMS
 				      if(acceptance>0.)
 					{
 					  hAngles->Fill(acceptance);
@@ -319,55 +325,9 @@ void chain_finder()
 	      
 	      if( num_hits_this_chain[num_chains] >= 6) 
 		{
-		  if(1)
-		    {
 
-		      printf("....KEEPING THIS CHAIN #%d. %d hits \n", num_chains,num_hits_this_chain[num_chains]);
-
-
-		      //These lines are only useful for test purposes
-		      
-		      if(ii!=temp_eve)
-			{
-			  real_eve_counter++;
-			  		  cout<<"EVENT: "<<ii<<endl;
-			}
-		      else
-			{
-			  cout<<"DOUBLE!!! <<<<<<<<------------------------------------------"<< ii<<endl;
-			  double_counter++;
-			}
-		      temp_eve = ii;
-		      
-		      
-		      for (Int_t jj=0; jj<num_hits_this_chain[num_chains]; jj++)
-			{
-			  printf(" %d", chain_hits[num_chains][jj]);
-			  
-			  //Fill the variables value of the found chain
-			  ChainEv.X_rec[jj] = hitevent[chain_hits[num_chains][jj]].X;
-			  ChainEv.Y_rec[jj] = hitevent[chain_hits[num_chains][jj]].Y;
-			  ChainEv.Z_rec[jj] = hitevent[chain_hits[num_chains][jj]].Z;
-			 			  
-			}
-		      
-		      for(Int_t kk=num_hits_this_chain[num_chains]; kk<500;kk++)	//Clean up loop
-			{
-			  ChainEv.X_rec[kk]=ChainEv.Y_rec[kk]=ChainEv.Z_rec[kk]=0;
-			}
-		      
-		      
-		      ChainEv.Hit = num_hits_this_chain[num_chains];//number of hits in the chain
-		      ChainEv.ID = num_chains;//Event Index. A Chain per index
-		      
-		      chaintree->Fill();
-		      
-		      printf("\n\n");
-		      
-		    }
-		  
-		  num_chains++; //NEW CHAIN, INCREASE THE INDEX
-		  /* save chain if >1 hit on it */
+		  store_data(ii);
+	
 		}
 	      else
 		{
@@ -393,12 +353,118 @@ void chain_finder()
      hseparation->Write();
      chaintree->Write();
      rootoutfile->Close();
-     infile->Close();
+     //    infile->Close();
 
 }
 
+  
 
-void readout(Int_t ii, Int_t Entries)
+
+
+void store_data(Int_t ii)
+{
+  //I just move the algorithm to a function. SHOULD BE CLEANED. I think I don't need to send any argument as
+  // is written now. 
+  
+	      
+  printf("....KEEPING THIS CHAIN #%d. %d hits \n", num_chains,num_hits_this_chain[num_chains]);
+  
+  //These lines are only useful for test purposes
+  
+  if(ii!=temp_eve)
+    {
+      real_eve_counter++;
+      cout<<"EVENT: "<<ii<<endl;
+    }
+  else
+    {
+      cout<<"DOUBLE!!! <<<<<<<<------------------------------------------"<< ii<<endl;
+      double_counter++;
+    }
+  
+  temp_eve = ii;
+  
+  
+  for (Int_t jj=0; jj<num_hits_this_chain[num_chains]; jj++)
+    {
+      printf(" %d", chain_hits[num_chains][jj]);
+      
+      //Fill the variables value of the found chain
+      ChainEv.X_rec[jj] = hitevent[chain_hits[num_chains][jj]].X;
+      ChainEv.Y_rec[jj] = hitevent[chain_hits[num_chains][jj]].Y;
+      ChainEv.Z_rec[jj] = hitevent[chain_hits[num_chains][jj]].Z;
+      
+    }
+  
+  
+  for(Int_t kk=num_hits_this_chain[num_chains]; kk<500;kk++)	//Clean up loop
+    {
+      ChainEv.X_rec[kk]=ChainEv.Y_rec[kk]=ChainEv.Z_rec[kk]=0;
+    }
+  
+  //HERE SHOULD BE CALLED THE SORTING FUNCTION
+  //Thus those variables ChainEv should be temporary. Perhapas just a temporary array
+  //and then the store struct
+  
+  
+  ChainEv.Hit = num_hits_this_chain[num_chains];//number of hits in the chain
+  ChainEv.ID = num_chains;//Event Index. A Chain per index
+  
+  chaintree->Fill();
+  
+  printf("\n\n");
+
+
+  num_chains++; //NEW CHAIN, INCREASE THE INDEX
+  
+}
+
+
+  
+
+/*
+ TO BE USED KEEP IN QUARENTINE
+
+//left and right, first index and last index
+
+void quickSort(int arr[], int left, int right) {
+
+  //****************************************************** //
+  // http://www.algolist.net/Algorithms/Sorting/Quicksort //
+  //****************************************************** //
+
+  
+   int i = left, j = right;
+   int tmp;
+   int pivot = arr[(left + right) / 2];
+   
+   //* partition * /
+   while (i <= j)
+     {
+       while (arr[i] < pivot)
+	 i++;
+       while (arr[j] > pivot)
+	 j--;
+       if (i <= j)
+	 {
+	   tmp = arr[i];
+	   arr[i] = arr[j];
+	   arr[j] = tmp;
+	   i++;
+	   j--;
+	 }
+     }; //tAKE CARE OF THIS SEMICOLON, MAYBE A MISTAKE??
+   
+   //* recursion * /
+   if (left < j)
+     quickSort(arr, left, j);
+   if (i < right)
+     quickSort(arr, i, right);
+ }
+*/
+
+
+void readout(HitStruct readevent[], Int_t ii, Int_t Entries, Int_t pass)
 {
   
   //This function is designed to readout two events and store
@@ -415,11 +481,20 @@ void readout(Int_t ii, Int_t Entries)
    //Each event contents a different number of hits. If the next event has
   // less hits than the previous one, the higher indexes of the array
   // will keep the previous values. Only applies to the space coordinates
-  hitevent[ndim].X = {};
-  hitevent[ndim].Y = {};
-  hitevent[ndim].Z = {}; 
-  
-  RTPCTree->GetEntry(ii);
+  readevent[ndim].X = {};
+  readevent[ndim].Y = {};
+  readevent[ndim].Z = {}; 
+
+  if(pass==0)
+    {
+      RTPCTree->GetEntry(ii);
+    }
+
+  if(pass==1)
+    {
+      cout<<"second pass"<<endl;
+      RTPCTree_2->GetEntry(ii);
+    }
   //  nb += RTPCTree->GetEntry(ii);     
   //      RTPCTree->Show(ii);
  
@@ -436,31 +511,31 @@ void readout(Int_t ii, Int_t Entries)
 	
 	{
 	  //	  cout<<"p+aHit[2]: "<<p+aHit[2]<<endl;
-	  if (hitevent[p+aHit[2]].Status == 0)//This condition, check if the event read joint previously has marked hits
+	  if (readevent[p+aHit[2]].Status == 0)//This condition, check if the event read joint previously has marked hits
 	    {
-	      hitevent[p].X = X[p];
-	      hitevent[p].Y = Y[p];
-	      hitevent[p].Z = Z[p];
+	      readevent[p].X = X[p];
+	      readevent[p].Y = Y[p];
+	      readevent[p].Z = Z[p];
 	      
-	      hitevent[p].Status = 0;
-	      hitevent[p].Ev_pos = 1;
+	      readevent[p].Status = 0;
+	      readevent[p].Ev_pos = 1;
 	      maxin++;
 	    }
 	  else
 	    {
-	      hitevent[p].Status = 1;
-	      hitevent[p].Ev_pos = 1;
+	      readevent[p].Status = 1;
+	      readevent[p].Ev_pos = 1;
 	      maxin++;
 	      }
 	}
       else
 	
 	{
-	  hitevent[p].X = X[p];
-	  hitevent[p].Y = Y[p];
-	  hitevent[p].Z = Z[p];
-	  hitevent[p].Status = 0;
-	  hitevent[p].Ev_pos = 1;
+	  readevent[p].X = X[p];
+	  readevent[p].Y = Y[p];
+	  readevent[p].Z = Z[p];
+	  readevent[p].Status = 0;
+	  readevent[p].Ev_pos = 1;
 	  maxin++;
 	}
     }
@@ -479,11 +554,11 @@ void readout(Int_t ii, Int_t Entries)
       {
 	for(Int_t p = aHit[0]; p<(aHit[0]+aHit[1]); p++)
 	  {
-	    hitevent[p].X = X[p-aHit[0]];
-	    hitevent[p].Y = Y[p-aHit[0]];
-	    hitevent[p].Z = Z[p-aHit[0]];
-	    hitevent[p].Status = 0;
-	    hitevent[p].Ev_pos = 2;
+	    readevent[p].X = X[p-aHit[0]];
+	    readevent[p].Y = Y[p-aHit[0]];
+	    readevent[p].Z = Z[p-aHit[0]];
+	    readevent[p].Status = 0;
+	    readevent[p].Ev_pos = 2;
 	    maxin++;
 	  }
       }
@@ -499,8 +574,13 @@ void readout(Int_t ii, Int_t Entries)
   //into the first chain.
   cout<<"*******IN********:"<<maxin<<"     EVENT 1: "<< ii<<" | EVENT 2: "<<ii+1<<"    aHit[0]: "<<aHit[0]<<" |  aHit[1]: "<<aHit[1]<<endl;
   //       RTPCTree->Show(i);
+
+ 
   
 }
+
+
+
 
 
 void accept_hit(Int_t next_hit)
@@ -523,6 +603,11 @@ void accept_hit(Int_t next_hit)
   //Its final number is the total number of hits in the chain
   
 }
+
+
+
+
+
 
 
 void variable(TString FileName)
@@ -553,7 +638,7 @@ void variable(TString FileName)
 		if (buf == "outputfile")	 
 		  {			
 		    ss >> outputfile;
-		    if (outputfile == "") outputfile = "ChainCandidates.root"; //DEFAULT VALUES
+		    if (outputfile == "") outputfile = "ChainCandidates.root"; //DEFAULT VALUE
 		  }
 
 		if (buf == "space")
@@ -589,7 +674,6 @@ void variable(TString FileName)
 int main(int argc, char** argv)
 {
   
-  
   TString dataname;
   dataname = "chain.ini";
   cout << "Compiled on: " __DATE__ " " __TIME__ "." << endl;
@@ -602,10 +686,12 @@ int main(int argc, char** argv)
   timer.Start();
   
   if(argc < 1) return 1;
+
   //    tree(argv[1]);
   //  for(Int_t k=0;k<1000;k++)
   {
-      chain_finder();
+    for (Int_t k = 0; k<2; k++)
+      chain_finder(k);
       //    cout<<"cycle: "<<k<<endl;
     }
     

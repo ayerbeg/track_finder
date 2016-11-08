@@ -30,9 +30,12 @@ typedef struct {
 } EventStruct;
 
 HitStruct hitevent[ndim];
+HitStruct readevent[ndim];
+
 EventStruct ChainEv;
 
 TTree   *RTPCTree;
+TTree   *RTPCTree_2;
 
 
 Int_t    event;
@@ -66,7 +69,6 @@ Int_t    max_entries;//temporary variable to control number of entries to read
 
 Int_t    adj_chain_hits[MAX_NUM_CHAINS][MAX_HITS_ON_CHAIN];
 
-
 TString inputfile;
 TString outputfile;
 double space;
@@ -74,10 +76,22 @@ double max_ang;
 double min_ang;
 double ang_sep;
 
+Int_t temp_eve;
+Int_t real_eve_counter;
+Int_t double_counter;
+
+TTree *chaintree ;
+
+void chain_finder(Int_t);
+
+void store_data(Int_t);
+
 void variable(TString);
 
-void readout(Int_t, Int_t);
+//void readout(Int_t, Int_t);
+void readout(HitStruct[], Int_t, Int_t, Int_t);
 
 void accept_hit(Int_t);
+
 
 #endif 
