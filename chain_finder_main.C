@@ -43,7 +43,7 @@ void chain_finder(Int_t k)
   if(k == 1)
     {
       cout<<" SECOND PASS!!"<<endl;
-      return;
+      //     return;
     }
 
   //GLOBAL VARIABLES HERE
@@ -52,47 +52,99 @@ void chain_finder(Int_t k)
    Double_t rad2deg = 180/(4*atan(1));
 
 
-    
-  //- ********************************
-  // DEFINE VARIABLES FROM ROOT FILE
-   
-   //   TFile *infile = new TFile("./files/1000SuperEvents.root");
-   //   TFile *infile = new TFile("./files/MirrorEvents.root");
-   //   TFile *infile = new TFile("files/10T-10_200ns_SE-26.root");
-   //   TFile *infile = new TFile("files/nt_P100T90_SE.root");
+  if(k==0)
+     {   
+       //- ********************************
+       // DEFINE VARIABLES FROM ROOT FILE
+       
+       //   TFile *infile = new TFile("./files/1000SuperEvents.root");
+       //   TFile *infile = new TFile("./files/MirrorEvents.root");
+       //   TFile *infile = new TFile("files/10T-10_200ns_SE-26.root");
+       //   TFile *infile = new TFile("files/nt_P100T90_SE.root");
+       
+       TString inputf = inputfile;
+       cout<<"INPUT FILE: " <<inputf<<endl;
+       
+       
+       TFile *infile = new TFile(inputf);
+       RTPCTree =(TTree*)infile->Get("eventtree");
+       
+       Entries = RTPCTree->GetEntries();
+       cout<<"Entries: "<<Entries<<endl;
+       
+       RTPCTree ->SetBranchAddress("event", &event);
+       RTPCTree ->SetBranchAddress("X", &X);
+       RTPCTree ->SetBranchAddress("Y", &Y);
+       RTPCTree ->SetBranchAddress("Z", &Z);
+       RTPCTree ->SetBranchAddress("Hit", &Hit);
+       
+       
+       
+       //***********************************
+       // DEFINE VARIABLES TO SAVE ROOT FILE
+       
+       TString outputfile_tmp = "ChainEvents_1.root";
+       rootoutfile_tmp = new TFile(outputfile_tmp, "recreate");
+       
+       //   TString outf_tmp = outputfile;
+       
+       cout<<"OUTPUT TMP FILE: " <<outputfile_tmp<<endl;
+       
+       //  TFile *rootoutfile = new TFile(outf, "recreate");
+       
+       chaintree = new TTree("chaintree","SE");
+       
+       chaintree->Branch("event", &ChainEv.ID, "ID/I");  // Create a branch called a, linked to local variable x, of type D (double)
+       chaintree->Branch("X", &ChainEv.X_rec, "X_rec[500]/D");
+       chaintree->Branch("Y", &ChainEv.Y_rec, "Y_rec[500]/D");
+       chaintree->Branch("Z", &ChainEv.Z_rec, "Z_rec[500]/D");
+       chaintree->Branch("Hit", &ChainEv.Hit, "Hit/I");
+       //***********************************
 
-   TString inputf = inputfile;
-   cout<<"INPUT FILE: " <<inputf<<endl;
 
-   
-   TFile *infile = new TFile(inputf);
-   RTPCTree =(TTree*)infile->Get("eventtree");
-   
-   Int_t Entries = RTPCTree->GetEntries();
-   cout<<"Entries: "<<Entries<<endl;
-   
-   RTPCTree ->SetBranchAddress("event", &event);
-   RTPCTree ->SetBranchAddress("X", &X);
-   RTPCTree ->SetBranchAddress("Y", &Y);
-   RTPCTree ->SetBranchAddress("Z", &Z);
-   RTPCTree ->SetBranchAddress("Hit", &Hit);
-   
-   //- ********************************
-   
-   // VARIABLES SET FOR 2nd PASS
-   TFile *infile_2=new TFile("ChainEvents_1.root");
+     }
   
-   RTPCTree_2 =(TTree*)infile_2->Get("chaintree");
-   
-   Int_t Entries_2 = RTPCTree_2->GetEntries();
-   cout<<"Entries_2: "<<Entries_2<<endl;
-   
-   RTPCTree_2 -> SetBranchAddress("event", &event);
-   RTPCTree_2 -> SetBranchAddress("X", &X);
-   RTPCTree_2 -> SetBranchAddress("Y", &Y);
-   RTPCTree_2 -> SetBranchAddress("Z", &Z);
-   RTPCTree_2 -> SetBranchAddress("Hit", &Hit);
-   
+  //- ********************************
+  // VARIABLES SET FOR 2nd PASS
+   if(k==1)
+     {
+       TFile *infile_2=new TFile("ChainEvents_1.root");
+       
+       RTPCTree_2 =(TTree*)infile_2->Get("chaintree");
+       
+       Entries_2 = RTPCTree_2->GetEntries();
+       cout<<"Entries_2: "<<Entries_2<<endl;
+       
+       RTPCTree_2 -> SetBranchAddress("event", &event);
+       RTPCTree_2 -> SetBranchAddress("X", &X);
+       RTPCTree_2 -> SetBranchAddress("Y", &Y);
+       RTPCTree_2 -> SetBranchAddress("Z", &Z);
+       RTPCTree_2 -> SetBranchAddress("Hit", &Hit);
+
+       //***********************************
+       // DEFINE VARIABLES TO SAVE ROOT FILE
+       
+       //   TFile *rootoutfile = new TFile("ChainEvents_2.root", "recreate");
+       
+       TString outf = outputfile;
+       
+       cout<<"OUTPUT FILE: " <<outf<<endl;
+       
+       rootoutfile = new TFile(outf, "recreate");
+       
+       chaintree = new TTree("chaintree","SE");
+       
+       chaintree->Branch("event", &ChainEv.ID, "ID/I");  // Create a branch called a, linked to local variable x, of type D (double)
+       chaintree->Branch("X", &ChainEv.X_rec, "X_rec[500]/D");
+       chaintree->Branch("Y", &ChainEv.Y_rec, "Y_rec[500]/D");
+       chaintree->Branch("Z", &ChainEv.Z_rec, "Z_rec[500]/D");
+       chaintree->Branch("Hit", &ChainEv.Hit, "Hit/I");
+       //***********************************
+
+
+
+
+     }
 
    /*   
    // TEMPORARY SET OF VARIABLES
@@ -111,36 +163,17 @@ void chain_finder(Int_t k)
    
    */
    
-   
-   //***********************************
-   // DEFINE VARIABLES TO SAVE ROOT FILE
-   
-   //   TFile *rootoutfile = new TFile("ChainEvents_2.root", "recreate");
-
-   TString outf = outputfile;
-
-   cout<<"OUTPUT FILE: " <<outf<<endl;
-   
-    TFile *rootoutfile = new TFile(outf, "recreate");
-   
-   chaintree = new TTree("chaintree","SE");
-   
-   chaintree->Branch("event", &ChainEv.ID, "ID/I");  // Create a branch called a, linked to local variable x, of type D (double)
-   chaintree->Branch("X", &ChainEv.X_rec, "X_rec[500]/D");
-   chaintree->Branch("Y", &ChainEv.Y_rec, "Y_rec[500]/D");
-   chaintree->Branch("Z", &ChainEv.Z_rec, "Z_rec[500]/D");
-   chaintree->Branch("Hit", &ChainEv.Hit, "Hit/I");
-  //***********************************
-
   
+
+   /*
   TH1F *hAngles = new TH1F("hAngles","angles", 181, -0.5,180.5);
   //  TH1F *hseparation = new TH1F("hseparation","separation<11", 120, -0.5, 11.5);
   TH1F *hseparation = new TH1F("hseparation","separation<11", 110, -0.5, 11.5);
   //  TH2F *hAngles_sep = new TH2F("hAngles_sep","angles-sep",  362  ,-0.25,180.25, 50, -0.5, 11.5);
   TH2F *hAngles_sep = new TH2F("hAngles_sep","angles-sep",  362  ,-0.25,180.25, 110, -0.5, 11.5);
-
+   */
+   
   TVector3 nil_vec(0,0,0);//null vector
-
   
   //LOOP TO READ THE VARIABLES FROM THE ROOT FILE
 
@@ -164,6 +197,7 @@ void chain_finder(Int_t k)
 
   
   
+  
   anchor_hit = 0;
   num_chains = 0;//Chain index (How many chains there are)
   num_hits_this_chain[num_chains] = 0;//Number of hits in the chain (was num_hits_this_chain[0])
@@ -174,25 +208,27 @@ void chain_finder(Int_t k)
   double_counter = 0;
   
   // Int_t max_entries = 1;
-     
-  Int_t max_entries = Entries;
-   
+  if(k==0)
+    max_entries = Entries;
+  
+  if(k==1)
+    max_entries = Entries_2;
+  
   for(Int_t ii = 0; ii < max_entries; ii++)  //uncomment for the whole file.
-    //    for(Int_t ii = 8; ii < max_entries; ii++) 
     {
-      //  Int_t ii = 180;
-
-      readout(hitevent, ii, Entries, k);//Read the event and store in the struct variables
-                  
+      
+      readout(hitevent, ii, max_entries, k);//Read the event and store in the struct variables
+      
       for (anchor_hit = 0; anchor_hit < maxin; anchor_hit++) //index of anchor hit
 	{
+	  if (ii==0)	  cout<<hitevent[anchor_hit].Status<<" "<<hitevent[anchor_hit].Ev_pos<<" "<<anchor_hit<<endl;
 	  
 	  if( (hitevent[anchor_hit].Status & HITUNAV) || hitevent[anchor_hit].Ev_pos == 2)
 	    //If Status=1 (used), do not do anything. With the condition Ev_pos, we stop the search of hits on the second event.
 	    //We just connect the first with events related on the second.
 	    //This is to avoid anchor hits on the second event, which will be processed in the next loop.
 	    //I set it first as AND but should be an OR.
-
+	    
 	    {
 	      //
 	    }
@@ -206,11 +242,12 @@ void chain_finder(Int_t k)
 	      
 	      hitevent[anchor_hit].Status |= HISUSED;// |= --> or eq;  a = a | b. It just assign the USED status to the hit
 
-
+	      if (ii==0&&k==1) cout<< hitevent[anchor_hit].Status<<endl;
 	      //SEARCH ALGORITHM----->
 	      
 	      for (seed_hit = 0; seed_hit < num_hits_this_chain[num_chains]; seed_hit++)
 		{
+		  if (ii==0&&k==1) cout<<" HERE 1: "<<hitevent[seed_hit].X<<" "<< hitevent[seed_hit].Y<<" "<< hitevent[seed_hit].Z<<" seed_hit: "<<seed_hit<<endl;
 		  
 		  seed_index = chain_hits[num_chains][seed_hit];// **(A)** (it is related to the anchor hit)
 	
@@ -222,12 +259,12 @@ void chain_finder(Int_t k)
 		    //NOTE: we have to take care about the variables, where are defined, how are handled
 		    
 		    {
-		      	      
+		      if (ii==0&&k==1) cout<<" HERE 1: "<<hitevent[next_hit].X<<" "<< hitevent[next_hit].Y<<" "<< hitevent[next_hit].Z<<" next_hit: "<<next_hit<<endl;		      	      
 		      
 		      if( !(hitevent[next_hit].Status & HITUNAV) )
 			{
 			  TVector3 pnext(hitevent[next_hit].X, hitevent[next_hit].Y, hitevent[next_hit].Z);
-			  
+
 			  if (next_hit>0 && (pnext!=nil_vec))
 			    {
 			      TVector3 pnext_pre(hitevent[next_hit-1].X, hitevent[next_hit-1].Y, hitevent[next_hit-1].Z);
@@ -237,11 +274,15 @@ void chain_finder(Int_t k)
 				  
 				  separation = (dif_vec).Mag();//REMEMBER!! They can be treated as vectors for the calculus we use
 
-				  hseparation->Fill(separation);//Histogram of separation between hits
+				  //	  hseparation->Fill(separation);//Histogram of separation between hits
 				  
 				  // if(separation <= MAX_LINK_SEP && separation > 0.0)
 
-				  if(separation <= Max_Link_Sep && separation > 0.0)
+				  if(
+				     (k==0 && (separation <= Max_Link_Sep && separation > 0.0))
+				     ||
+				     (k==1 && (separation <= Max_Link_Sep+2 && separation > 0.0))
+				     )
 
 				    //by definition, separation is always>0 but with this condition,
 				    //we remove 0's (i.e. repeated hits) IT MUST BE SOLVED WITH THE PREVIOUS CONDITION
@@ -270,12 +311,12 @@ void chain_finder(Int_t k)
 
 
 				      // FILLING HISTOGRAMS
-				      if(acceptance>0.)
-					{
-					  hAngles->Fill(acceptance);
+				      // if(acceptance>0.)
+				      // 	{
+				      // 	  hAngles->Fill(acceptance);
 					  
-					  hAngles_sep->Fill(acceptance, separation);
-					}
+				      // 	  hAngles_sep->Fill(acceptance, separation);
+				      // 	}
 				      
 				      //HERE SHOULD BE ADD THE FUNCTION TO CROSS CHECK
 				      //IF THE HIT BELONGS TO A TRACK OR NOT.
@@ -299,17 +340,36 @@ void chain_finder(Int_t k)
 				      //But definetly shouyld be a distintion between close and far hits
 				      
 				      //    if (separation < 4 && acceptance <39)
-					if (separation < Ang_Sep && acceptance < Max_Ang)
-					  {
-					    accept_hit(next_hit);
-					  }
-					
-					if (separation > Ang_Sep && acceptance < Min_Ang)
-					  //	if (separation > 4 && acceptance <33.3)
-					  {					
-					    accept_hit(next_hit);
-					  }
-					
+
+				      if(k == 0)
+					{
+					  if (separation < Ang_Sep && acceptance < Max_Ang)
+					    {
+					      accept_hit(next_hit);
+					    }
+					  
+					  if (separation > Ang_Sep && acceptance < Min_Ang)
+					    //	if (separation > 4 && acceptance <33.3)
+					    {					
+					      accept_hit(next_hit);
+					    }
+					}
+
+				      if(k == 1)
+					{
+					  if (separation < Ang_Sep && acceptance < Max_Ang-15)
+					    {
+					      accept_hit(next_hit);
+					    }
+					  
+					  if (separation > Ang_Sep && acceptance < Min_Ang-10)
+					    //	if (separation > 4 && acceptance <33.3)
+					    {					
+					      accept_hit(next_hit);
+					    }
+					}
+
+
 				    }// if(separation<=
 				
 				  else
@@ -347,12 +407,25 @@ void chain_finder(Int_t k)
 
      cout<<"Total Events: "<<real_eve_counter<<endl;
      cout<<"double counts (split tracks): " <<double_counter<<endl;
-     
-     hAngles_sep->Write();
-     hAngles->Write();
-     hseparation->Write();
+
+
+     // hAngles_sep->Write();
+     // hAngles->Write();
+     // hseparation->Write();
+
+ 
      chaintree->Write();
-     rootoutfile->Close();
+
+     if(k==0)
+       {
+	 delete chaintree;
+	 rootoutfile_tmp->Close();
+       }
+     
+     cout<<"RETURN"<<endl;
+
+     if(k==1)
+	rootoutfile->Close();
      //    infile->Close();
 
 }
@@ -416,6 +489,8 @@ void store_data(Int_t ii)
 
 
   num_chains++; //NEW CHAIN, INCREASE THE INDEX
+
+  
   
 }
 
@@ -464,7 +539,7 @@ void quickSort(int arr[], int left, int right) {
 */
 
 
-void readout(HitStruct readevent[], Int_t ii, Int_t Entries, Int_t pass)
+void readout(HitStruct readevent[], Int_t ii, Int_t Entrie, Int_t pass)
 {
   
   //This function is designed to readout two events and store
@@ -475,9 +550,21 @@ void readout(HitStruct readevent[], Int_t ii, Int_t Entries, Int_t pass)
   //corresponds to the hit_1 position (from 0) in the previous iteration
   //and this is the hit we want to consider if was used or not.
   //Then it is filled as normal.
-
+   
   maxin = 0;
+  if (ii==0)
+  {
+    aHit[0] = aHit[1] = aHit[2]=0;
+    if(pass==1 && nomore!=1)
+      {
+	for(Int_t init = 0; init<ndim; init++)   readevent[init].Status = 0;
+	nomore =1;
+      }
+  }
 
+   cout<<"aHit[2]: "<<aHit[2]<<endl;
+
+  
    //Each event contents a different number of hits. If the next event has
   // less hits than the previous one, the higher indexes of the array
   // will keep the previous values. Only applies to the space coordinates
@@ -497,19 +584,21 @@ void readout(HitStruct readevent[], Int_t ii, Int_t Entries, Int_t pass)
     }
   //  nb += RTPCTree->GetEntry(ii);     
   //      RTPCTree->Show(ii);
- 
 
   
   aHit[0]=Hit;
   aHit[1]=0;
+
 
   //FILL THE FIRST EVENT
   
   for(Int_t p = 0; p<aHit[0]; p++)
     {
       if (ii>=0)//TO BE REMOVED?
-	
 	{
+
+	  if (ii==0&&pass==1) cout<<"HELLO!! "<<readevent[p].Status<<endl;
+
 	  //	  cout<<"p+aHit[2]: "<<p+aHit[2]<<endl;
 	  if (readevent[p+aHit[2]].Status == 0)//This condition, check if the event read joint previously has marked hits
 	    {
@@ -520,12 +609,15 @@ void readout(HitStruct readevent[], Int_t ii, Int_t Entries, Int_t pass)
 	      readevent[p].Status = 0;
 	      readevent[p].Ev_pos = 1;
 	      maxin++;
+	      if (ii==0&&pass==1) cout<<"HELLO 1!!"<<endl;
+
 	    }
 	  else
 	    {
 	      readevent[p].Status = 1;
 	      readevent[p].Ev_pos = 1;
 	      maxin++;
+	      if (ii==0&&pass==1) cout<<"HELLO 2!!"<<endl;
 	      }
 	}
       else
@@ -537,6 +629,7 @@ void readout(HitStruct readevent[], Int_t ii, Int_t Entries, Int_t pass)
 	  readevent[p].Status = 0;
 	  readevent[p].Ev_pos = 1;
 	  maxin++;
+	  if (ii==0&&pass==1) cout<<"HELLO 3!!"<<endl;
 	}
     }
 
@@ -544,9 +637,21 @@ void readout(HitStruct readevent[], Int_t ii, Int_t Entries, Int_t pass)
   
   //CHECK THIS CONDITION!! I THINK SHOULD TAKE CARE ABOUT OUT OF BOUNDS 
   // right now is just to avoid the second event. Remove once the mirror test has finished
-  if(ii<Entries-1)
+  if(ii<Entrie-1)
     {
-      RTPCTree->GetEntry(ii+1);
+
+      if(pass==0)
+	{
+	  RTPCTree->GetEntry(ii+1);
+	}
+      
+      if(pass==1)
+	{
+	  cout<<"second pass 2"<<endl;
+	  RTPCTree_2->GetEntry(ii+1);
+	}
+      
+      //     RTPCTree->GetEntry(ii+1);
       aHit[1]=Hit;
       
       //FILL THE SECOND EVENT
@@ -572,11 +677,11 @@ void readout(HitStruct readevent[], Int_t ii, Int_t Entries, Int_t pass)
   //BUT only when testing files and every event represents ONLY one chain.
   //In case the number of hits in the candidate chain is larger than aHit[0], hits from the second event are being taken
   //into the first chain.
-  cout<<"*******IN********:"<<maxin<<"     EVENT 1: "<< ii<<" | EVENT 2: "<<ii+1<<"    aHit[0]: "<<aHit[0]<<" |  aHit[1]: "<<aHit[1]<<endl;
+  cout<<"*******IN******** (sum of two consecutive events):"<<maxin<<"     EVENT 1: "<< ii<<" | EVENT 2: "<<ii+1<<"    aHit[0]: "<<aHit[0]<<" |  aHit[1]: "<<aHit[1]<<" |  aHit[2]: "<<aHit[2]<<endl;
   //       RTPCTree->Show(i);
 
  
-  
+
 }
 
 

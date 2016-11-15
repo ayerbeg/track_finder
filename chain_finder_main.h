@@ -2,7 +2,7 @@
 #define chain_finder_main_h 1
 
 #define ndim 1500//so big? 
-#define MAX_NUM_CHAINS 10000 //in the original is 100, should studied
+#define MAX_NUM_CHAINS 30000 //in the original is 100, should studied
 #define MAX_HITS_ON_CHAIN 30000 //in the original is 100, should studied
 #define MAX_LINK_SEP 11 //This is the maximum separation to be included in the chain
 
@@ -69,6 +69,10 @@ Int_t    max_entries;//temporary variable to control number of entries to read
 
 Int_t    adj_chain_hits[MAX_NUM_CHAINS][MAX_HITS_ON_CHAIN];
 
+Int_t Entries, Entries_2;
+
+//Int_t max_entries;
+
 TString inputfile;
 TString outputfile;
 double space;
@@ -79,6 +83,11 @@ double ang_sep;
 Int_t temp_eve;
 Int_t real_eve_counter;
 Int_t double_counter;
+
+Int_t nomore;
+
+TFile *rootoutfile;
+TFile *rootoutfile_tmp;
 
 TTree *chaintree ;
 
@@ -92,6 +101,7 @@ void variable(TString);
 void readout(HitStruct[], Int_t, Int_t, Int_t);
 
 void accept_hit(Int_t);
+
 
 
 #endif 
