@@ -1,23 +1,19 @@
 #ifndef chain_finder_main_h
 #define chain_finder_main_h 1
 
-#define ndim 1500//so big? 
-#define MAX_NUM_CHAINS 30000 //in the original is 100, should studied
-#define MAX_HITS_ON_CHAIN 30000 //in the original is 100, should studied
+#define ndim 500//so big? 
+#define MAX_NUM_CHAINS 48000 //in the original is 100, should studied
+#define MAX_HITS_ON_CHAIN 500 //in the original is 100, should studied
 #define MAX_LINK_SEP 11 //This is the maximum separation to be included in the chain
 
 #include "TVector3.h"
 
 
 typedef struct {
-  //  Int_t EventID;
-  Int_t event;
   Double_t X;
   Double_t Y;
   Double_t Z;
-  Int_t Hit;
   Int_t Status;
-  Int_t Ev_pos; //if event is the first or the second on the pile
 } HitStruct;
 
 
@@ -29,22 +25,22 @@ typedef struct {
   Int_t Hit;
 } EventStruct;
 
-HitStruct hitevent[ndim];
-HitStruct readevent[ndim];
+HitStruct hitevent[ndim];//The structure has dimensions of how many hits in the event
+HitStruct readevent[ndim];//it is declared here, but should be local defined because it is used in the readout
 
 EventStruct ChainEv;
 
+//************************
+//INPUT ROOTFILE VARIABLES
 TTree   *RTPCTree;
-TTree   *RTPCTree_2;
-
-
 Int_t    event;
 Double_t X[ndim], Y[ndim], Z[ndim];
 Int_t    Hit;
+//************************
 
 Int_t    EventID;
 
-Int_t    aHit[3];//hits array for two events readout
+Int_t    NoH;//Number of Hits
 
 Int_t    anchor_hit, seed_hit, next_hit, seed_index;
 Int_t    num_chains;
@@ -83,22 +79,29 @@ double ang_sep;
 Int_t temp_eve;
 Int_t real_eve_counter;
 Int_t double_counter;
+Int_t mcts;
 
-Int_t nomore;
+Double_t Max_Link_Sep;
+Double_t Max_Ang;
+Double_t Min_Ang;
+Double_t Ang_Sep;
+
+Double_t rad2deg;
 
 TFile *rootoutfile;
 TFile *rootoutfile_tmp;
 
 TTree *chaintree ;
 
-void chain_finder(Int_t);
+void chain_finder();
 
 void store_data(Int_t);
 
 void variable(TString);
 
 //void readout(Int_t, Int_t);
-void readout(HitStruct[], Int_t, Int_t, Int_t);
+void search(HitStruct[], Int_t, Int_t);
+void readout(HitStruct[], Int_t);
 
 void accept_hit(Int_t);
 
