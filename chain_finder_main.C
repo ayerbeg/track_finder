@@ -63,14 +63,13 @@ void chain_finder()
   //***********************************
   // DEFINE VARIABLES TO SAVE ROOT FILE
   
-  TString outputfile  = "ChainEvents_1.root";
-  rootoutfile  = new TFile(outputfile , "recreate");
+  // TString outputfile  = "ChainEvents_1.root";
+  // rootoutfile  = new TFile(outputfile , "recreate");
   
-  //   TString outf  = outputfile;
+  TString outf  = outputfile;
   
   cout<<"OUTPUT TMP FILE: " <<outputfile <<endl;
-  
-  //  TFile *rootoutfile = new TFile(outf, "recreate");
+  TFile *rootoutfile = new TFile(outf, "recreate");
   
   chaintree = new TTree("chaintree","SE");
   
