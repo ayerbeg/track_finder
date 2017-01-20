@@ -2,7 +2,7 @@
 #define chain_finder_main_h 1
 
 #define ndim 500//so big? 
-#define MAX_NUM_CHAINS 48000 //in the original is 100, should studied
+#define MAX_NUM_CHAINS 100 //in the original is 100, should studied
 #define MAX_HITS_ON_CHAIN 500 //in the original is 100, should studied
 #define MAX_LINK_SEP 11 //This is the maximum separation to be included in the chain
 
@@ -18,25 +18,16 @@ typedef struct {
 
 
 typedef struct {
-  Int_t ID;
-  Double_t X_rec[500];
-  Double_t Y_rec[500];
-  Double_t Z_rec[500];
+  Int_t ID; //This is the chain ID
+  Double_t X_rec[MAX_HITS_ON_CHAIN];
+  Double_t Y_rec[MAX_HITS_ON_CHAIN];
+  Double_t Z_rec[MAX_HITS_ON_CHAIN];
   Int_t Hit;
-} EventStruct;
+} ChainStruct;
 
 HitStruct hitevent[ndim];//The structure has dimensions of how many hits in the event
-HitStruct readevent[ndim];//it is declared here, but should be local defined because it is used in the readout
 
-EventStruct ChainEv;
-
-//************************
-//INPUT ROOTFILE VARIABLES
-TTree   *RTPCTree;
-Int_t    event;
-Double_t X[ndim], Y[ndim], Z[ndim];
-Int_t    Hit;
-//************************
+ChainEvStruct ChainArray[MAX_NUM_CHAINS];
 
 Int_t    EventID;
 
@@ -55,22 +46,11 @@ TVector3 pnext_pre;
 TVector3 pnext;
 
 Int_t    index_hits;
-
-Double_t diff[3];
-double   dif;
-
 Int_t    maxin; //max number of hits in an event. Calculated during the readout of the event
 
-Int_t    max_entries;//temporary variable to control number of entries to read
 
-Int_t    adj_chain_hits[MAX_NUM_CHAINS][MAX_HITS_ON_CHAIN];
+Int_t Entries;
 
-Int_t Entries, Entries_2;
-
-//Int_t max_entries;
-
-TString inputfile;
-TString outputfile;
 double space;
 double max_ang;
 double min_ang;
@@ -88,23 +68,8 @@ Double_t Ang_Sep;
 
 Double_t rad2deg;
 
-TFile *rootoutfile;
-TFile *rootoutfile_tmp;
-
-TTree *chaintree ;
-
-void chain_finder();
-
-void store_data(Int_t);
-
-void variable(TString);
-
-//void readout(Int_t, Int_t);
-void search(HitStruct[], Int_t, Int_t);
-void readout(HitStruct[], Int_t);
-
 void accept_hit(Int_t);
-
-
+void search(HitStruct[], Int_t, Int_t);
+void store_data(Int_t);
 
 #endif 
