@@ -27,7 +27,7 @@ typedef struct {
 
 HitStruct hitevent[ndim];//The structure has dimensions of how many hits in the event
 
-ChainEvStruct ChainArray[MAX_NUM_CHAINS];
+ChainStruct ChainArray[MAX_NUM_CHAINS];
 
 Int_t    EventID;
 
