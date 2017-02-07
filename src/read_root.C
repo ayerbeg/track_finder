@@ -50,6 +50,8 @@ void read_root()
   
 
   
+  const Int_t NoC=MAX_NUM_CHAINS; //number of chains. Perhaps useless
+
   //***********************************
   // DEFINE VARIABLES TO SAVE ROOT FILE
   
@@ -64,10 +66,10 @@ void read_root()
   
   chaintree = new TTree("chaintree","SE");
   
-  chaintree->Branch("event", &ChainArray[100].ID, "ID/I");  // Create a branch called a, linked to local variable x, of type D (double)
-  chaintree->Branch("X", &ChainArray[100].X_rec, "X_rec[500]/D");
-  chaintree->Branch("Y", &ChainArray[100].Y_rec, "Y_rec[500]/D");
-  chaintree->Branch("Z", &ChainArray[100].Z_rec, "Z_rec[500]/D");
-  chaintree->Branch("Hit", &ChainArray[100].Hit, "Hit/I");
+  chaintree->Branch("event", &ChainArray[NoC].ID, "ID/I");  // Create a branch called a, linked to local variable x, of type D (double)
+  chaintree->Branch("X", &ChainArray[NoC].X_rec, "X_rec[500]/D");
+  chaintree->Branch("Y", &ChainArray[NoC].Y_rec, "Y_rec[500]/D");
+  chaintree->Branch("Z", &ChainArray[NoC].Z_rec, "Z_rec[500]/D");
+  chaintree->Branch("Hit", &ChainArray[NoC].Hit, "Hit/I");
   //***********************************
 }

@@ -35,7 +35,9 @@ Int_t    num_hits_this_chain[MAX_NUM_CHAINS];
 Int_t    num_chains;
 Int_t    chain_hits[MAX_NUM_CHAINS][MAX_HITS_ON_CHAIN];
 
-  Int_t temp_eve;
+Int_t temp_eve;
+
+Int_t ct;
 
 void search(HitStruct hitevent[], Int_t max_hits, Int_t event_ii )
 {
@@ -55,15 +57,17 @@ void search(HitStruct hitevent[], Int_t max_hits, Int_t event_ii )
   
   cout<<"<search>: max_hits "<<max_hits<<endl;
  
-  anchor_hit = 0;
-  num_chains = 0;//Chain index (How many chains there are)
-  num_hits_this_chain[num_chains] = 0;//Number of hits in the chain (was num_hits_this_chain[0])
-  
-  temp_eve = -1;
-  real_eve_counter = 0;
-  
-  double_counter = 0;
-  
+  if(event_ii==0)
+    {
+      anchor_hit = 0;
+      num_chains = 0;//Chain index (How many chains there are)
+      num_hits_this_chain[num_chains] = 0;//Number of hits in the chain (was num_hits_this_chain[0])
+      
+      temp_eve = -1;
+      real_eve_counter = 0;
+      
+      double_counter = 0;
+    }
   // Int_t max_entries = 1;
   //  max_entries = Entries;
   
@@ -297,7 +301,7 @@ void store_data(Int_t ii)
  
   // BUT THIS IS THE STORE OF THE STRUCTURE, THE CODE IS STILL RUNNING
   // UNTIL THE LOOP (OVER HITS AND EVENTS) FINISH
-  
+ 
 }
 
 
