@@ -6,10 +6,11 @@
 #include <iostream>
 #include "TFile.h"
 #include "TTree.h"
-#define ndim 500//so big? 
-#define MAX_NUM_CHAINS 100 //in the original is 100, should studied
-#define MAX_HITS_ON_CHAIN 500 //in the original is 100, should studied
-#define MAX_LINK_SEP 11 //This is the maximum separation to be included in the chain
+
+/* #define ndim 500//so big?  */
+/* #define MAX_NUM_CHAINS 2000 //in the original is 100, should studied */
+/* #define MAX_HITS_ON_CHAIN 500 //in the original is 100, should studied */
+/* #define MAX_LINK_SEP 11 //This is the maximum separation to be included in the chain */
 void read_root();
 
 extern Int_t Entries;

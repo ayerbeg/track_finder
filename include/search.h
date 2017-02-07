@@ -4,10 +4,11 @@
 #include "TVector3.h"
 #include "Rtypes.h"
 #include "read_root.h"
-#define ndim 500//so big? 
-#define MAX_NUM_CHAINS 100 //in the original is 100, should studied
-#define MAX_HITS_ON_CHAIN 500 //in the original is 100, should studied
-#define MAX_LINK_SEP 11 //This is the maximum separation to be included in the chain
+
+/* #define ndim 500//so big?  */
+/* #define MAX_NUM_CHAINS 100 //in the original is 100, should studied */
+/* #define MAX_HITS_ON_CHAIN 500 //in the original is 100, should studied */
+/* #define MAX_LINK_SEP 11 //This is the maximum separation to be included in the chain */
 
 
 //Int_t    EventID;
@@ -35,6 +36,10 @@ extern Int_t double_counter;
 extern Int_t mcts;
 
 extern  Int_t temp_eve;
+
+extern Int_t    num_chains;
+
+
 // Int_t Entries;
 
 /* double space; */
@@ -48,6 +53,7 @@ extern  Int_t temp_eve;
 void search(HitStruct[], Int_t, Int_t);
 void accept_hit(Int_t);
 void store_data(Int_t);
+
 
 
 
