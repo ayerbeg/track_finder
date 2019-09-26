@@ -8,5 +8,5 @@ This branch (Function-Test) was created to test the track finder algorithm being
 In order to compile:
 - download the code in a dedicated folder, including src and include folder
 - create a new folder
-- in the new folder type-> cmake < relative or absolute direction of the folder with the code> 
+- in the new folder type-> cmake <relative or absolute direction of the folder with the code> 
 - if configuration works, type-> make
