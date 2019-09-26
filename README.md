@@ -10,3 +10,5 @@ In order to compile:
 - create a new folder
 - in the new folder type-> cmake <relative or absolute direction of the folder with the code> 
 - if configuration works, type-> make
+
+The file p80Mev.root is an input example file. Must be copied into the created folder or change the path in the ini file.
